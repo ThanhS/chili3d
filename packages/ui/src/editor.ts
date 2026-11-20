@@ -1,7 +1,6 @@
 // Part of the Chili3d Project, under the AGPL-3.0 License.
 // See LICENSE file in the project root for full license information.
 
-import { ChatPanel } from "@chili3d/ai";
 import {
     type IApplication,
     type ICommand,
@@ -12,7 +11,6 @@ import {
 } from "@chili3d/core";
 import { div } from "@chili3d/element";
 import style from "./editor.module.css";
-import { FloatPanel } from "./floatPanel";
 import { ProjectView } from "./project";
 import { PropertyView } from "./property";
 import { MaterialDataContent, MaterialEditor } from "./property/material";
@@ -27,11 +25,7 @@ export class Editor extends HTMLElement {
     private readonly _commandContextContainer = div({});
     private _contentEl: HTMLDivElement | null = null;
     private commandContext?: CommandContext;
-    private chatDock?: HTMLElement;
-    private chatPanel?: ChatPanel;
-    private floatingChat?: FloatPanel;
     private _sidebarWidth: number = 360;
-    private _chatWidth: number = 320;
     private _isResizingSidebar: boolean = false;
     private _sidebarEl: HTMLDivElement | null = null;
     private _projectView?: ProjectView;
@@ -47,7 +41,6 @@ export class Editor extends HTMLElement {
         viewport.classList.add(style.viewport);
         this._viewportContainer = div({ className: style.viewportContainer }, viewport);
         this.render();
-        this.showChat();
     }
 
     private render() {
@@ -82,66 +75,6 @@ export class Editor extends HTMLElement {
         this.app.mainWindow?.appendChild(this);
     }
 
-    private ensureChatPanel(): ChatPanel {
-        if (this.chatPanel) return this.chatPanel;
-        const chat = new ChatPanel();
-        chat.onClose = () => this.hideChat();
-        chat.onDock = () => this.dockChat();
-        this.attachDragToDetach(chat.header);
-        this.chatPanel = chat;
-        return chat;
-    }
-
-    private showChat() {
-        if (this.chatDock || this.floatingChat) return;
-        const chat = this.ensureChatPanel();
-        chat.setFloating(false);
-
-        const resizer = div({
-            className: style.chatResizer,
-            onpointerdown: (e: PointerEvent) => this._startChatResize(e),
-        });
-        this.chatDock = div({ className: style.rightPanel }, resizer, chat);
-        this.chatDock.style.width = `${this._chatWidth}px`;
-        this._contentEl?.append(this.chatDock);
-    }
-
-    private hideChat() {
-        this.chatDock?.remove();
-        this.chatDock = undefined;
-        this.closeFloatingChat();
-    }
-
-    private closeFloatingChat() {
-        if (this.floatingChat) {
-            this.floatingChat.remove();
-            this.floatingChat.dispose();
-            this.floatingChat = undefined;
-        }
-    }
-
-    private readonly toggleChat = () => {
-        if (this.chatDock || this.floatingChat) {
-            this.hideChat();
-        } else {
-            this.showChat();
-        }
-    };
-
-    private attachDragToDetach(header: HTMLElement) {
-        header.addEventListener("pointerdown", (e: PointerEvent) => {
-            if ((e.target as HTMLElement).closest("button")) return;
-            const startX = e.clientX;
-            const startY = e.clientY;
-            this.trackPointerDrag((ev, stop) => {
-                if (Math.abs(ev.clientX - startX) + Math.abs(ev.clientY - startY) > 6) {
-                    this.detachChat(ev.clientX, ev.clientY);
-                    stop();
-                }
-            });
-        });
-    }
-
     private trackPointerDrag(onMove: (ev: PointerEvent, stop: () => void) => void, onEnd?: () => void) {
         const onUp = () => {
             document.removeEventListener("pointermove", move);
@@ -153,52 +86,6 @@ export class Editor extends HTMLElement {
         document.addEventListener("pointermove", move);
         document.addEventListener("pointerup", onUp);
         document.addEventListener("pointercancel", onUp);
-    }
-
-    private detachChat(mouseX: number, mouseY: number) {
-        const chat = this.chatPanel;
-        if (!chat || !this.chatDock) return;
-        this.chatDock?.remove();
-        this.chatDock = undefined;
-        chat.setFloating(true);
-
-        this.floatingChat = new FloatPanel({
-            title: "ai.title",
-            content: chat,
-            actions: chat.floatingActions(),
-            width: 380,
-            height: 520,
-            x: Math.max(0, mouseX - 190),
-            y: Math.max(0, mouseY - 16),
-            onClose: () => {
-                this.floatingChat = undefined;
-            },
-        });
-        this.app.mainWindow?.appendChild(this.floatingChat);
-    }
-
-    private dockChat() {
-        this.closeFloatingChat();
-        this.showChat();
-    }
-
-    private _startChatResize(e: PointerEvent) {
-        e.preventDefault();
-        const dock = this.chatDock;
-        if (!dock) return;
-        const rect = dock.getBoundingClientRect();
-        if (this.app.mainWindow) this.app.mainWindow.style.cursor = "ew-resize";
-        this.trackPointerDrag(
-            (ev) => {
-                const minWidth = 220;
-                const maxWidth = Math.floor(window.innerWidth * 0.6);
-                this._chatWidth = Math.max(minWidth, Math.min(maxWidth, rect.right - ev.clientX));
-                dock.style.width = `${this._chatWidth}px`;
-            },
-            () => {
-                if (this.app.mainWindow) this.app.mainWindow.style.cursor = "";
-            },
-        );
     }
 
     private applySidebarSplit() {
@@ -263,7 +150,6 @@ export class Editor extends HTMLElement {
         PubSub.default.sub("editVariables", this._handleVariablesEdit);
         PubSub.default.sub("openCommandContext", this.openContext);
         PubSub.default.sub("closeCommandContext", this.closeContext);
-        PubSub.default.sub("toggleChatPanel", this.toggleChat);
     }
 
     disconnectedCallback(): void {
@@ -271,10 +157,6 @@ export class Editor extends HTMLElement {
         PubSub.default.remove("editVariables", this._handleVariablesEdit);
         PubSub.default.remove("openCommandContext", this.openContext);
         PubSub.default.remove("closeCommandContext", this.closeContext);
-        PubSub.default.remove("toggleChatPanel", this.toggleChat);
-        this.chatDock?.remove();
-        this.chatDock = undefined;
-        this.closeFloatingChat();
     }
 
     private readonly openContext = (command: ICommand) => {

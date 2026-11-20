@@ -281,11 +281,11 @@ describe("ParametricRibbonProfiles", () => {
             "annotate.diameter",
             "annotate.angle",
             "annotate.text",
+            "create.statsTable",
             "file.import",
             "file.export",
             "feature.variable",
             "wechat.group",
-            "ai.toggleChat",
         ]);
     });
 });

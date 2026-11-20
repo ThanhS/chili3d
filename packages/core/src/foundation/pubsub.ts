@@ -85,7 +85,6 @@ export interface PubSubEventMap {
     showSelectionControl: (controller: AsyncController) => void;
     showToast: (message: I18nKeys, ...args: any[]) => void;
     statusBarTip: (tip: I18nKeys, ...args: any[]) => void;
-    toggleChatPanel: () => void;
     /**
      * Replaces what the floating input holds, for a drag that keeps it up as a readout. A box
      * the user has started typing in is left alone — see `Input.setText`.

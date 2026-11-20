@@ -110,6 +110,7 @@ export const DefaultRibbon: RibbonTabProfile[] = [
                     "annotate.dimension",
                     ["annotate.radius", "annotate.diameter", "annotate.angle"],
                     "annotate.text",
+                    "create.statsTable",
                 ],
             },
             {
@@ -122,7 +123,7 @@ export const DefaultRibbon: RibbonTabProfile[] = [
             },
             {
                 groupName: "ribbon.group.other",
-                items: ["wechat.group", "ai.toggleChat"],
+                items: ["wechat.group"],
             },
         ],
     },
@@ -219,6 +220,7 @@ export const ParametricRibbonProfiles: RibbonProfileExtra[] = [
                     "annotate.dimension",
                     ["annotate.radius", "annotate.diameter", "annotate.angle"],
                     "annotate.text",
+                    "create.statsTable",
                 ],
             },
             {
@@ -227,7 +229,7 @@ export const ParametricRibbonProfiles: RibbonProfileExtra[] = [
             },
             {
                 groupName: "ribbon.group.other",
-                items: ["feature.variable", "wechat.group", "ai.toggleChat"],
+                items: ["feature.variable", "wechat.group"],
             },
         ],
     },
