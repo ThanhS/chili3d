@@ -24,6 +24,16 @@ const mockLocaleZh: Locale = {
     } as any,
 };
 
+const mockLocaleVi: Locale = {
+    display: "Tiếng Việt",
+    language: "vi-VN",
+    translation: {
+        "common.cancel": "Hủy",
+        "common.confirm": "Xác nhận",
+        "error.default:{0}": "Lỗi: {0}",
+    } as any,
+};
+
 describe("I18n", () => {
     describe("addLanguage", () => {
         test("should add a language to the languages map", () => {
@@ -67,10 +77,19 @@ describe("I18n", () => {
 
         test("should return 'en' if browser language does not match", () => {
             Object.defineProperty(navigator, "language", {
-                value: "fr-FR",
+                value: "de-DE",
                 writable: true,
             });
             expect(I18n.defaultLanguage()).toBe("en");
+        });
+
+        test("should match a regional locale by base language", () => {
+            I18n.addLanguage(mockLocaleVi);
+            Object.defineProperty(navigator, "language", {
+                value: "vi",
+                writable: true,
+            });
+            expect(I18n.defaultLanguage()).toBe("vi-VN");
         });
     });
 

@@ -40,7 +40,11 @@ export class I18n {
 
     static defaultLanguage(): string {
         const defaultLanguage = navigator.language.toLowerCase();
-        const language = languages.keys().find((key) => key.toLowerCase() === defaultLanguage);
+        const baseLanguage = defaultLanguage.split("-")[0];
+        const language = languages.keys().find((key) => {
+            const normalized = key.toLowerCase();
+            return normalized === defaultLanguage || normalized.split("-")[0] === baseLanguage;
+        });
         if (language) {
             return language;
         }

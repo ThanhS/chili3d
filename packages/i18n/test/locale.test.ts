@@ -1,13 +1,14 @@
 // Part of the Chili3d Project, under the AGPL-3.0 License.
 // See LICENSE file in the project root for full license information.
 
-import { en, ptBr, zhCn } from "../src";
+import { en, ptBr, vi, zhCn } from "../src";
 
 describe("i18n locales", () => {
     const locales = [
         { name: "en", locale: en },
         { name: "zhCn", locale: zhCn },
         { name: "ptBr", locale: ptBr },
+        { name: "vi", locale: vi },
     ] as const;
 
     describe("locale structure", () => {
@@ -31,6 +32,7 @@ describe("i18n locales", () => {
             { name: "en", locale: en, language: "en" },
             { name: "zhCn", locale: zhCn, language: "zh-CN" },
             { name: "ptBr", locale: ptBr, language: "pt-BR" },
+            { name: "vi", locale: vi, language: "vi-VN" },
         ] as const)("$name language should be $language", ({ locale, language }) => {
             expect(locale.language).toBe(language);
         });
@@ -48,6 +50,22 @@ describe("i18n locales", () => {
             const enKeys = new Set(Object.keys(en.translation));
             const zhKeys = new Set(Object.keys(zhCn.translation));
             const extra = [...zhKeys].filter((k) => !enKeys.has(k));
+            expect(extra).toEqual([]);
+        });
+    });
+
+    describe("key consistency between en and vi", () => {
+        test("vi should have all keys present in en", () => {
+            const enKeys = new Set(Object.keys(en.translation));
+            const viKeys = new Set(Object.keys(vi.translation));
+            const missing = [...enKeys].filter((k) => !viKeys.has(k));
+            expect(missing).toEqual([]);
+        });
+
+        test("en should have all keys present in vi", () => {
+            const enKeys = new Set(Object.keys(en.translation));
+            const viKeys = new Set(Object.keys(vi.translation));
+            const extra = [...viKeys].filter((k) => !enKeys.has(k));
             expect(extra).toEqual([]);
         });
     });
@@ -103,6 +121,7 @@ describe("i18n locales", () => {
         test.each([
             { name: "zhCn", locale: zhCn },
             { name: "ptBr", locale: ptBr },
+            { name: "vi", locale: vi },
         ] as const)("$name translation values should be non-empty strings", ({ locale }) => {
             for (const [key, value] of Object.entries(locale.translation)) {
                 expect(typeof value).toBe("string");
@@ -117,6 +136,7 @@ describe("i18n locales", () => {
         test.each([
             { name: "zhCn", locale: zhCn },
             { name: "ptBr", locale: ptBr },
+            { name: "vi", locale: vi },
         ] as const)("$name should keep the same placeholders as en for every key", ({ locale }) => {
             const mismatches: string[] = [];
             for (const [key, enValue] of Object.entries(en.translation)) {
